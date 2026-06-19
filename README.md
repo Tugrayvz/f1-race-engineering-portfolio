@@ -8,7 +8,7 @@ Professional Formula 1 telemetry analysis, race engineering and motorsport data 
 
 This repository contains Formula 1 data analytics projects designed to replicate real-world race engineering workflows.
 
-The objective is to analyze telemetry data, compare driver performance, evaluate race strategy and build engineering-focused decision support tools using real F1 data.
+The objective is to analyze telemetry data, compare driver performance, evaluate race strategy and build engineering-focused decision support tools using real Formula 1 data.
 
 ---
 
@@ -23,7 +23,7 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 - Throttle Analysis
 - Brake Analysis
 - RPM Analysis
-- Lap Delta Calculation
+- Delta Time Analysis
 - Average Speed Comparison
 - Top Speed Comparison
 - Race Engineer Notes
@@ -67,6 +67,12 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ---
 
+### Delta Time Analysis
+
+![Delta Time Analysis](images/delta-time-analysis.png)
+
+---
+
 ### Race Engineer Notes
 
 ![Race Engineer Notes](images/race-engineer-notes.png)
@@ -75,25 +81,32 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ## Example Analysis
 
-Example comparison:
+### Session Details
 
-- Season: 2024
-- Grand Prix: Monza
-- Session: Qualifying
-- Driver 1: Max Verstappen
-- Driver 2: Charles Leclerc
+| Parameter | Value |
+|------------|--------|
+| Season | 2024 |
+| Grand Prix | Monza |
+| Session | Qualifying |
+| Driver 1 | Max Verstappen |
+| Driver 2 | Charles Leclerc |
+
+### Analysis Output
 
 The dashboard compares telemetry traces and highlights performance differences in:
 
 - Braking zones
+- Corner entry speed
+- Corner exit performance
 - Acceleration phases
 - Top speed sections
 - Engine behaviour
 - Overall lap efficiency
+- Time gained and lost throughout the lap
 
 ---
 
-## Project Roadmap
+## Current Development Progress
 
 ### Phase 1 — Telemetry Dashboard
 
@@ -102,14 +115,18 @@ The dashboard compares telemetry traces and highlights performance differences i
 - [x] Brake analysis
 - [x] Throttle analysis
 - [x] RPM analysis
+- [x] Lap delta visualization
+- [x] Average speed comparison
+- [x] Top speed comparison
 - [x] Race engineer notes
 
 ### Phase 2 — Advanced Telemetry
 
-- [ ] Sector analysis
-- [ ] Lap delta visualization
-- [ ] Corner-by-corner comparison
 - [ ] Track map visualization
+- [ ] Corner-by-corner analysis
+- [ ] Sector performance analysis
+- [ ] Interactive telemetry overlays
+- [ ] Racing line comparison
 
 ### Phase 3 — Race Strategy Simulator
 
@@ -117,19 +134,45 @@ The dashboard compares telemetry traces and highlights performance differences i
 - [ ] Pit stop optimization
 - [ ] Safety car simulations
 - [ ] Undercut / Overcut analysis
+- [ ] Strategy recommendation engine
 
 ### Phase 4 — Machine Learning
 
 - [ ] Lap time prediction
 - [ ] Driver performance index
 - [ ] Pace forecasting
-- [ ] Strategy recommendation engine
+- [ ] Race outcome prediction
 
 ---
 
 ## Future Goal
 
-Build a complete Formula 1 Race Engineering Toolkit capable of supporting telemetry analysis, strategy modelling and performance evaluation workflows similar to those used in professional motorsport environments.
+Build a complete Formula 1 Race Engineering Toolkit capable of supporting telemetry analysis, strategy modelling, performance evaluation and race decision workflows similar to those used in professional motorsport environments.
+
+---
+
+## Repository Structure
+
+```text
+f1-race-engineering-portfolio/
+│
+├── README.md
+├── requirements.txt
+│
+├── images/
+│   ├── dashboard-overview.png
+│   ├── speed-comparison.png
+│   ├── throttle-comparison.png
+│   ├── brake-comparison.png
+│   ├── delta-time-analysis.png
+│   └── race-engineer-notes.png
+│
+└── telemetry-dashboard/
+    ├── dashboard.py
+    ├── data/
+    ├── notebooks/
+    └── src/
+```
 
 ---
 
@@ -139,4 +182,4 @@ Build a complete Formula 1 Race Engineering Toolkit capable of supporting teleme
 
 Motorsport Data Analytics • Artificial Intelligence • Software Engineering
 
-GitHub Portfolio Project
+Building a Formula 1 Race Engineering Portfolio through data analytics, simulation and machine learning.
