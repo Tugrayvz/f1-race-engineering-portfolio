@@ -1,14 +1,14 @@
 # 🏎️ F1 Race Engineering Portfolio
 
-Professional Formula 1 telemetry analysis, race engineering and motorsport data science projects built with Python.
+Professional Formula 1 telemetry analysis, race strategy simulation and motorsport data science projects built with Python.
 
 ---
 
 ## Overview
 
-This repository contains Formula 1 data analytics projects designed to replicate real-world race engineering workflows.
+This repository contains Formula 1 data analytics projects designed to replicate real-world race engineering and strategy workflows.
 
-The objective is to analyze telemetry data, compare driver performance, evaluate race strategy and build engineering-focused decision support tools using real Formula 1 data.
+The objective is to analyze telemetry data, compare driver performance, evaluate race strategy and build engineering-focused decision support tools using real Formula 1 data and simulation models.
 
 ---
 
@@ -33,6 +33,9 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 - Average Speed Comparison
 - Top Speed Comparison
 - Race Engineer Notes
+- Race Strategy Simulator
+- Tyre Degradation Model
+- Strategy Comparison Visualization
 
 ---
 
@@ -44,6 +47,7 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 - Plotly
 - Pandas
 - NumPy
+- Matplotlib
 
 ---
 
@@ -115,6 +119,12 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ---
 
+### Strategy Comparison
+
+![Strategy Comparison](images/strategy-comparison.png)
+
+---
+
 ### Race Engineer Notes
 
 ![Race Engineer Notes](images/race-engineer-notes.png)
@@ -135,7 +145,7 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ### Analysis Output
 
-The dashboard compares telemetry traces and highlights performance differences in:
+The telemetry dashboard compares driver performance and highlights differences in:
 
 - Braking zones
 - Corner entry speed
@@ -147,6 +157,21 @@ The dashboard compares telemetry traces and highlights performance differences i
 - Sector performance
 - Overall lap efficiency
 - Time gained and lost throughout the lap
+
+---
+
+# Race Strategy Simulator
+
+A race strategy simulation module for comparing tyre compounds, pit stop timing and total race time.
+
+## Strategy Simulator Features
+
+- Multi-strategy comparison
+- Soft, Medium and Hard tyre degradation models
+- Pit stop loss modelling
+- Total race time estimation
+- Automatic recommended strategy selection
+- Tyre degradation visualization
 
 ---
 
@@ -180,7 +205,9 @@ The dashboard compares telemetry traces and highlights performance differences i
 
 ### Phase 3 — Race Strategy Simulator
 
-- [ ] Tire degradation modelling
+- [x] Tire degradation modelling
+- [x] Strategy comparison visualization
+- [x] Multi-strategy comparison
 - [ ] Pit stop optimization
 - [ ] Safety car simulations
 - [ ] Undercut / Overcut analysis
@@ -215,14 +242,19 @@ f1-race-engineering-portfolio/
 │   ├── racing-line-comparison.png
 │   ├── engineering-report.png
 │   ├── ai-race-engineer-summary.png
+│   ├── strategy-comparison.png
 │   └── race-engineer-notes.png
 │
-└── telemetry-dashboard/
-    ├── dashboard.py
-    ├── data/
-    │   └── cache/
-    ├── notebooks/
-    └── src/
+├── telemetry-dashboard/
+│   ├── dashboard.py
+│   ├── data/
+│   │   └── cache/
+│   ├── notebooks/
+│   └── src/
+│
+└── strategy-simulator/
+    ├── simulator.py
+    └── README.md
 ```
 
 ---

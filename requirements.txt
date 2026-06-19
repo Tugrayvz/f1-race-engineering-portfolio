@@ -5,3 +5,4 @@ plotly
 streamlit
 matplotlib
 scikit-learn
+matplotlib
