@@ -11,7 +11,7 @@ st.set_page_config(page_title="F1 Telemetry Dashboard", layout="wide")
 
 st.title("F1 Telemetry Analysis Dashboard")
 st.write(
-    "Compare Formula 1 driver telemetry: speed, throttle, brake, RPM, delta time, sector performance and speed-colored track map."
+    "Compare Formula 1 driver telemetry, sector performance, speed maps and engineering reports."
 )
 
 CACHE_DIR = "telemetry-dashboard/data/cache"
@@ -30,19 +30,8 @@ driver_2 = st.sidebar.text_input("Driver 2 Code", "LEC")
 def plot_telemetry(tel1, tel2, driver_1, driver_2, column, title, y_title):
     fig = go.Figure()
 
-    fig.add_trace(go.Scatter(
-        x=tel1["Distance"],
-        y=tel1[column],
-        mode="lines",
-        name=driver_1,
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=tel2["Distance"],
-        y=tel2[column],
-        mode="lines",
-        name=driver_2,
-    ))
+    fig.add_trace(go.Scatter(x=tel1["Distance"], y=tel1[column], mode="lines", name=driver_1))
+    fig.add_trace(go.Scatter(x=tel2["Distance"], y=tel2[column], mode="lines", name=driver_2))
 
     fig.update_layout(
         title=title,
@@ -79,8 +68,9 @@ if st.sidebar.button("Analyze"):
     lap_time_2 = lap2["LapTime"]
     lap_delta = lap_time_1 - lap_time_2
 
-    col1, col2, col3 = st.columns(3)
+    fastest_driver = driver_1 if lap_time_1 < lap_time_2 else driver_2
 
+    col1, col2, col3 = st.columns(3)
     col1.metric(f"{driver_1} Fastest Lap", str(lap_time_1))
     col2.metric(f"{driver_2} Fastest Lap", str(lap_time_2))
     col3.metric("Lap Delta", str(lap_delta))
@@ -109,40 +99,38 @@ if st.sidebar.button("Analyze"):
 
     st.plotly_chart(fig_delta, use_container_width=True)
 
-    final_delta = delta_time.iloc[-1]
-
-    if final_delta < 0:
-        st.success(f"{driver_1} gained time over {driver_2} across the lap.")
-    else:
-        st.success(f"{driver_2} gained time over {driver_1} across the lap.")
-
     st.subheader("Sector Performance Analysis")
+
+    sector_times_1 = [
+        lap1["Sector1Time"],
+        lap1["Sector2Time"],
+        lap1["Sector3Time"],
+    ]
+
+    sector_times_2 = [
+        lap2["Sector1Time"],
+        lap2["Sector2Time"],
+        lap2["Sector3Time"],
+    ]
+
+    sector_winners = []
+
+    for s1, s2 in zip(sector_times_1, sector_times_2):
+        sector_winners.append(driver_1 if s1 < s2 else driver_2)
 
     sector_data = pd.DataFrame({
         "Sector": ["Sector 1", "Sector 2", "Sector 3"],
-        driver_1: [
-            format_timedelta(lap1["Sector1Time"]),
-            format_timedelta(lap1["Sector2Time"]),
-            format_timedelta(lap1["Sector3Time"]),
-        ],
-        driver_2: [
-            format_timedelta(lap2["Sector1Time"]),
-            format_timedelta(lap2["Sector2Time"]),
-            format_timedelta(lap2["Sector3Time"]),
-        ],
-        "Faster Driver": [
-            driver_1 if lap1["Sector1Time"] < lap2["Sector1Time"] else driver_2,
-            driver_1 if lap1["Sector2Time"] < lap2["Sector2Time"] else driver_2,
-            driver_1 if lap1["Sector3Time"] < lap2["Sector3Time"] else driver_2,
-        ],
+        driver_1: [format_timedelta(t) for t in sector_times_1],
+        driver_2: [format_timedelta(t) for t in sector_times_2],
+        "Faster Driver": sector_winners,
     })
 
     st.dataframe(sector_data, use_container_width=True)
 
     sector_deltas = {
-        "Sector 1": (lap1["Sector1Time"] - lap2["Sector1Time"]).total_seconds(),
-        "Sector 2": (lap1["Sector2Time"] - lap2["Sector2Time"]).total_seconds(),
-        "Sector 3": (lap1["Sector3Time"] - lap2["Sector3Time"]).total_seconds(),
+        "Sector 1": (sector_times_1[0] - sector_times_2[0]).total_seconds(),
+        "Sector 2": (sector_times_1[1] - sector_times_2[1]).total_seconds(),
+        "Sector 3": (sector_times_1[2] - sector_times_2[2]).total_seconds(),
     }
 
     biggest_sector = max(sector_deltas, key=lambda s: abs(sector_deltas[s]))
@@ -159,7 +147,6 @@ if st.sidebar.button("Analyze"):
     car_data = lap1.get_car_data()
 
     min_len = min(len(pos), len(car_data))
-
     x = pos["X"].iloc[:min_len]
     y = pos["Y"].iloc[:min_len]
     speed = car_data["Speed"].iloc[:min_len]
@@ -196,18 +183,49 @@ if st.sidebar.button("Analyze"):
     max_speed_1 = tel1["Speed"].max()
     max_speed_2 = tel2["Speed"].max()
 
+    avg_speed_diff = avg_speed_1 - avg_speed_2
+    top_speed_diff = max_speed_1 - max_speed_2
+
     st.write(f"{driver_1} average speed: {avg_speed_1:.2f} km/h")
     st.write(f"{driver_2} average speed: {avg_speed_2:.2f} km/h")
 
     st.write(f"{driver_1} top speed: {max_speed_1:.2f} km/h")
     st.write(f"{driver_2} top speed: {max_speed_2:.2f} km/h")
 
-    if avg_speed_1 > avg_speed_2:
-        st.info(f"{driver_1} carried higher average speed over the lap.")
-    else:
-        st.info(f"{driver_2} carried higher average speed over the lap.")
+    st.subheader("Engineering Report Generator")
 
-    if max_speed_1 > max_speed_2:
-        st.info(f"{driver_1} reached a higher top speed.")
+    sector_summary = ", ".join(
+        [f"Sector {i + 1}: {winner}" for i, winner in enumerate(sector_winners)]
+    )
+
+    if abs(avg_speed_diff) > abs(top_speed_diff):
+        key_area = "Average lap speed"
     else:
-        st.info(f"{driver_2} reached a higher top speed.")
+        key_area = "Top speed performance"
+
+    report_data = pd.DataFrame({
+        "Metric": [
+            "Fastest Driver",
+            "Lap Delta",
+            "Sector Winners",
+            "Average Speed Difference",
+            "Top Speed Difference",
+            "Key Performance Area",
+        ],
+        "Result": [
+            fastest_driver,
+            str(lap_delta),
+            sector_summary,
+            f"{avg_speed_diff:.2f} km/h",
+            f"{top_speed_diff:.2f} km/h",
+            key_area,
+        ],
+    })
+
+    st.dataframe(report_data, use_container_width=True)
+
+    st.info(
+        f"{fastest_driver} produced the faster lap. "
+        f"The biggest sector difference was in {biggest_sector}. "
+        f"The main performance indicator in this comparison was {key_area.lower()}."
+    )
