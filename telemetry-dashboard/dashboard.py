@@ -10,7 +10,7 @@ st.set_page_config(page_title="F1 Telemetry Dashboard", layout="wide")
 
 st.title("F1 Telemetry Analysis Dashboard")
 st.write(
-    "Compare Formula 1 driver telemetry: speed, throttle, brake, RPM and delta time."
+    "Compare Formula 1 driver telemetry: speed, throttle, brake, RPM, delta time and track map."
 )
 
 CACHE_DIR = "telemetry-dashboard/data/cache"
@@ -82,10 +82,25 @@ if st.sidebar.button("Analyze"):
     col2.metric(f"{driver_2} Fastest Lap", str(lap_time_2))
     col3.metric("Lap Delta", str(lap_delta))
 
-    plot_telemetry(tel1, tel2, driver_1, driver_2, "Speed", "Speed vs Distance", "Speed (km/h)")
-    plot_telemetry(tel1, tel2, driver_1, driver_2, "Throttle", "Throttle vs Distance", "Throttle (%)")
-    plot_telemetry(tel1, tel2, driver_1, driver_2, "Brake", "Brake vs Distance", "Brake")
-    plot_telemetry(tel1, tel2, driver_1, driver_2, "RPM", "RPM vs Distance", "RPM")
+    plot_telemetry(
+        tel1, tel2, driver_1, driver_2,
+        "Speed", "Speed vs Distance", "Speed (km/h)"
+    )
+
+    plot_telemetry(
+        tel1, tel2, driver_1, driver_2,
+        "Throttle", "Throttle vs Distance", "Throttle (%)"
+    )
+
+    plot_telemetry(
+        tel1, tel2, driver_1, driver_2,
+        "Brake", "Brake vs Distance", "Brake"
+    )
+
+    plot_telemetry(
+        tel1, tel2, driver_1, driver_2,
+        "RPM", "RPM vs Distance", "RPM"
+    )
 
     st.subheader("Delta Time Analysis")
 
@@ -115,6 +130,31 @@ if st.sidebar.button("Analyze"):
         st.success(f"{driver_1} gained time over {driver_2} across the lap.")
     else:
         st.success(f"{driver_2} gained time over {driver_1} across the lap.")
+
+    st.subheader("Track Map Visualization")
+
+    pos = lap1.get_pos_data()
+
+    fig_track = go.Figure()
+
+    fig_track.add_trace(
+        go.Scatter(
+            x=pos["X"],
+            y=pos["Y"],
+            mode="lines",
+            name=f"{driver_1} racing line",
+        )
+    )
+
+    fig_track.update_layout(
+        title=f"{grand_prix} Track Map - {driver_1}",
+        xaxis_title="X Position",
+        yaxis_title="Y Position",
+        height=600,
+        yaxis=dict(scaleanchor="x", scaleratio=1),
+    )
+
+    st.plotly_chart(fig_track, use_container_width=True)
 
     st.subheader("Race Engineer Notes")
 

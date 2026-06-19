@@ -24,6 +24,7 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 - Brake Analysis
 - RPM Analysis
 - Delta Time Analysis
+- Track Map Visualization
 - Average Speed Comparison
 - Top Speed Comparison
 - Race Engineer Notes
@@ -73,6 +74,12 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ---
 
+### Track Map Visualization
+
+![Track Map](images/track-map.png)
+
+---
+
 ### Race Engineer Notes
 
 ![Race Engineer Notes](images/race-engineer-notes.png)
@@ -116,13 +123,14 @@ The dashboard compares telemetry traces and highlights performance differences i
 - [x] Throttle analysis
 - [x] RPM analysis
 - [x] Lap delta visualization
+- [x] Track map visualization
 - [x] Average speed comparison
 - [x] Top speed comparison
 - [x] Race engineer notes
 
 ### Phase 2 — Advanced Telemetry
 
-- [ ] Track map visualization
+- [ ] Speed-colored track map
 - [ ] Corner-by-corner analysis
 - [ ] Sector performance analysis
 - [ ] Interactive telemetry overlays
@@ -145,12 +153,6 @@ The dashboard compares telemetry traces and highlights performance differences i
 
 ---
 
-## Future Goal
-
-Build a complete Formula 1 Race Engineering Toolkit capable of supporting telemetry analysis, strategy modelling, performance evaluation and race decision workflows similar to those used in professional motorsport environments.
-
----
-
 ## Repository Structure
 
 ```text
@@ -165,14 +167,22 @@ f1-race-engineering-portfolio/
 │   ├── throttle-comparison.png
 │   ├── brake-comparison.png
 │   ├── delta-time-analysis.png
+│   ├── track-map.png
 │   └── race-engineer-notes.png
 │
 └── telemetry-dashboard/
     ├── dashboard.py
     ├── data/
+    │   └── cache/
     ├── notebooks/
     └── src/
 ```
+
+---
+
+## Future Goal
+
+Build a complete Formula 1 Race Engineering Toolkit capable of supporting telemetry analysis, strategy modelling, performance evaluation and race decision workflows similar to those used in professional motorsport environments.
 
 ---
 
