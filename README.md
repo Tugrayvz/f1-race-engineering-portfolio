@@ -28,6 +28,7 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 - Track Map Visualization
 - Speed Colored Track Map
 - Engineering Report Generator
+- AI Race Engineer Summary
 - Average Speed Comparison
 - Top Speed Comparison
 - Race Engineer Notes
@@ -101,6 +102,12 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ---
 
+### AI Race Engineer Summary
+
+![AI Race Engineer Summary](images/ai-race-engineer-summary.png)
+
+---
+
 ### Race Engineer Notes
 
 ![Race Engineer Notes](images/race-engineer-notes.png)
@@ -149,6 +156,7 @@ The dashboard compares telemetry traces and highlights performance differences i
 - [x] Track map visualization
 - [x] Speed-colored track map
 - [x] Engineering report generator
+- [x] AI race engineer summary
 - [x] Average speed comparison
 - [x] Top speed comparison
 - [x] Race engineer notes
@@ -158,7 +166,7 @@ The dashboard compares telemetry traces and highlights performance differences i
 - [ ] Corner-by-corner analysis
 - [ ] Racing line comparison
 - [ ] Interactive telemetry overlays
-- [ ] AI race engineer summary
+- [x] AI race engineer summary
 - [x] Driver comparison report generation
 
 ### Phase 3 — Race Strategy Simulator
@@ -196,6 +204,7 @@ f1-race-engineering-portfolio/
 │   ├── track-map.png
 │   ├── speed-track-map.png
 │   ├── engineering-report.png
+│   ├── ai-race-engineer-summary.png
 │   └── race-engineer-notes.png
 │
 └── telemetry-dashboard/

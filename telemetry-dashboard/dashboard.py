@@ -11,7 +11,7 @@ st.set_page_config(page_title="F1 Telemetry Dashboard", layout="wide")
 
 st.title("F1 Telemetry Analysis Dashboard")
 st.write(
-    "Compare Formula 1 driver telemetry, sector performance, speed maps and engineering reports."
+    "Compare Formula 1 driver telemetry, sector performance, speed maps and AI-style engineering summaries."
 )
 
 CACHE_DIR = "telemetry-dashboard/data/cache"
@@ -49,6 +49,56 @@ def format_timedelta(td):
     return f"{td.total_seconds():.3f}s"
 
 
+def generate_ai_race_engineer_summary(
+    driver_1,
+    driver_2,
+    fastest_driver,
+    lap_delta,
+    sector_winners,
+    biggest_sector,
+    avg_speed_diff,
+    top_speed_diff,
+):
+    slower_driver = driver_2 if fastest_driver == driver_1 else driver_1
+    lap_delta_seconds = abs(lap_delta.total_seconds())
+
+    sector_1_winner = sector_winners[0]
+    sector_2_winner = sector_winners[1]
+    sector_3_winner = sector_winners[2]
+
+    if avg_speed_diff > 0:
+        avg_speed_text = f"{driver_1} carried a higher average speed by {abs(avg_speed_diff):.2f} km/h."
+    elif avg_speed_diff < 0:
+        avg_speed_text = f"{driver_2} carried a higher average speed by {abs(avg_speed_diff):.2f} km/h."
+    else:
+        avg_speed_text = "Both drivers had identical average speed across the lap."
+
+    if top_speed_diff > 0:
+        top_speed_text = f"{driver_1} achieved a higher top speed by {abs(top_speed_diff):.2f} km/h."
+    elif top_speed_diff < 0:
+        top_speed_text = f"{driver_2} achieved a higher top speed by {abs(top_speed_diff):.2f} km/h."
+    else:
+        top_speed_text = "Both drivers reached the same top speed."
+
+    return f"""
+**{fastest_driver}** produced the faster lap, finishing **{lap_delta_seconds:.3f} seconds** ahead of **{slower_driver}**.
+
+Sector performance shows:
+
+- Sector 1 advantage: **{sector_1_winner}**
+- Sector 2 advantage: **{sector_2_winner}**
+- Sector 3 advantage: **{sector_3_winner}**
+
+The largest performance difference occurred in **{biggest_sector}**, making it the decisive sector in this comparison.
+
+{avg_speed_text}
+
+{top_speed_text}
+
+Overall, the lap difference was mainly influenced by sector execution, straight-line performance and speed consistency across the lap.
+"""
+
+
 if st.sidebar.button("Analyze"):
     with st.spinner("Loading F1 session data..."):
         session = fastf1.get_session(year, grand_prix, session_type)
@@ -83,12 +133,14 @@ if st.sidebar.button("Analyze"):
     st.subheader("Delta Time Analysis")
 
     fig_delta = go.Figure()
-    fig_delta.add_trace(go.Scatter(
-        x=ref_tel["Distance"],
-        y=delta_time,
-        mode="lines",
-        name=f"{driver_1} vs {driver_2}",
-    ))
+    fig_delta.add_trace(
+        go.Scatter(
+            x=ref_tel["Distance"],
+            y=delta_time,
+            mode="lines",
+            name=f"{driver_1} vs {driver_2}",
+        )
+    )
 
     fig_delta.update_layout(
         title=f"Delta Time: {driver_1} vs {driver_2}",
@@ -101,29 +153,21 @@ if st.sidebar.button("Analyze"):
 
     st.subheader("Sector Performance Analysis")
 
-    sector_times_1 = [
-        lap1["Sector1Time"],
-        lap1["Sector2Time"],
-        lap1["Sector3Time"],
-    ]
-
-    sector_times_2 = [
-        lap2["Sector1Time"],
-        lap2["Sector2Time"],
-        lap2["Sector3Time"],
-    ]
+    sector_times_1 = [lap1["Sector1Time"], lap1["Sector2Time"], lap1["Sector3Time"]]
+    sector_times_2 = [lap2["Sector1Time"], lap2["Sector2Time"], lap2["Sector3Time"]]
 
     sector_winners = []
-
     for s1, s2 in zip(sector_times_1, sector_times_2):
         sector_winners.append(driver_1 if s1 < s2 else driver_2)
 
-    sector_data = pd.DataFrame({
-        "Sector": ["Sector 1", "Sector 2", "Sector 3"],
-        driver_1: [format_timedelta(t) for t in sector_times_1],
-        driver_2: [format_timedelta(t) for t in sector_times_2],
-        "Faster Driver": sector_winners,
-    })
+    sector_data = pd.DataFrame(
+        {
+            "Sector": ["Sector 1", "Sector 2", "Sector 3"],
+            driver_1: [format_timedelta(t) for t in sector_times_1],
+            driver_2: [format_timedelta(t) for t in sector_times_2],
+            "Faster Driver": sector_winners,
+        }
+    )
 
     st.dataframe(sector_data, use_container_width=True)
 
@@ -152,18 +196,20 @@ if st.sidebar.button("Analyze"):
     speed = car_data["Speed"].iloc[:min_len]
 
     fig_track = go.Figure()
-    fig_track.add_trace(go.Scatter(
-        x=x,
-        y=y,
-        mode="markers",
-        marker=dict(
-            size=6,
-            color=speed,
-            colorscale="Turbo",
-            colorbar=dict(title="Speed km/h"),
-        ),
-        showlegend=False,
-    ))
+    fig_track.add_trace(
+        go.Scatter(
+            x=x,
+            y=y,
+            mode="markers",
+            marker=dict(
+                size=6,
+                color=speed,
+                colorscale="Turbo",
+                colorbar=dict(title="Speed km/h"),
+            ),
+            showlegend=False,
+        )
+    )
 
     fig_track.update_layout(
         title=f"{grand_prix} Speed Map - {driver_1}",
@@ -203,29 +249,40 @@ if st.sidebar.button("Analyze"):
     else:
         key_area = "Top speed performance"
 
-    report_data = pd.DataFrame({
-        "Metric": [
-            "Fastest Driver",
-            "Lap Delta",
-            "Sector Winners",
-            "Average Speed Difference",
-            "Top Speed Difference",
-            "Key Performance Area",
-        ],
-        "Result": [
-            fastest_driver,
-            str(lap_delta),
-            sector_summary,
-            f"{avg_speed_diff:.2f} km/h",
-            f"{top_speed_diff:.2f} km/h",
-            key_area,
-        ],
-    })
+    report_data = pd.DataFrame(
+        {
+            "Metric": [
+                "Fastest Driver",
+                "Lap Delta",
+                "Sector Winners",
+                "Average Speed Difference",
+                "Top Speed Difference",
+                "Key Performance Area",
+            ],
+            "Result": [
+                fastest_driver,
+                str(lap_delta),
+                sector_summary,
+                f"{avg_speed_diff:.2f} km/h",
+                f"{top_speed_diff:.2f} km/h",
+                key_area,
+            ],
+        }
+    )
 
     st.dataframe(report_data, use_container_width=True)
 
-    st.info(
-        f"{fastest_driver} produced the faster lap. "
-        f"The biggest sector difference was in {biggest_sector}. "
-        f"The main performance indicator in this comparison was {key_area.lower()}."
+    st.subheader("AI Race Engineer Summary")
+
+    ai_summary = generate_ai_race_engineer_summary(
+        driver_1,
+        driver_2,
+        fastest_driver,
+        lap_delta,
+        sector_winners,
+        biggest_sector,
+        avg_speed_diff,
+        top_speed_diff,
     )
+
+    st.markdown(ai_summary)
