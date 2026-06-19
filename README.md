@@ -24,6 +24,7 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 - Brake Analysis
 - RPM Analysis
 - Delta Time Analysis
+- Sector Performance Analysis
 - Track Map Visualization
 - Speed Colored Track Map
 - Average Speed Comparison
@@ -75,6 +76,12 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ---
 
+### Sector Performance Analysis
+
+![Sector Analysis](images/sector-analysis.png)
+
+---
+
 ### Track Map Visualization
 
 ![Track Map](images/track-map.png)
@@ -115,6 +122,7 @@ The dashboard compares telemetry traces and highlights performance differences i
 - Acceleration phases
 - Top speed sections
 - Engine behaviour
+- Sector performance
 - Overall lap efficiency
 - Time gained and lost throughout the lap
 
@@ -130,6 +138,7 @@ The dashboard compares telemetry traces and highlights performance differences i
 - [x] Throttle analysis
 - [x] RPM analysis
 - [x] Lap delta visualization
+- [x] Sector performance analysis
 - [x] Track map visualization
 - [x] Speed-colored track map
 - [x] Average speed comparison
@@ -139,10 +148,10 @@ The dashboard compares telemetry traces and highlights performance differences i
 ### Phase 2 — Advanced Telemetry
 
 - [ ] Corner-by-corner analysis
-- [ ] Sector performance analysis
-- [ ] Interactive telemetry overlays
 - [ ] Racing line comparison
+- [ ] Interactive telemetry overlays
 - [ ] AI race engineer summary
+- [ ] Driver comparison report generation
 
 ### Phase 3 — Race Strategy Simulator
 
@@ -175,6 +184,7 @@ f1-race-engineering-portfolio/
 │   ├── throttle-comparison.png
 │   ├── brake-comparison.png
 │   ├── delta-time-analysis.png
+│   ├── sector-analysis.png
 │   ├── track-map.png
 │   ├── speed-track-map.png
 │   └── race-engineer-notes.png

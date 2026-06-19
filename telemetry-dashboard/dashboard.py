@@ -2,6 +2,7 @@ import os
 
 import fastf1
 import fastf1.utils
+import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -10,7 +11,7 @@ st.set_page_config(page_title="F1 Telemetry Dashboard", layout="wide")
 
 st.title("F1 Telemetry Analysis Dashboard")
 st.write(
-    "Compare Formula 1 driver telemetry: speed, throttle, brake, RPM, delta time and speed-colored track map."
+    "Compare Formula 1 driver telemetry: speed, throttle, brake, RPM, delta time, sector performance and speed-colored track map."
 )
 
 CACHE_DIR = "telemetry-dashboard/data/cache"
@@ -29,23 +30,19 @@ driver_2 = st.sidebar.text_input("Driver 2 Code", "LEC")
 def plot_telemetry(tel1, tel2, driver_1, driver_2, column, title, y_title):
     fig = go.Figure()
 
-    fig.add_trace(
-        go.Scatter(
-            x=tel1["Distance"],
-            y=tel1[column],
-            mode="lines",
-            name=driver_1,
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=tel1["Distance"],
+        y=tel1[column],
+        mode="lines",
+        name=driver_1,
+    ))
 
-    fig.add_trace(
-        go.Scatter(
-            x=tel2["Distance"],
-            y=tel2[column],
-            mode="lines",
-            name=driver_2,
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=tel2["Distance"],
+        y=tel2[column],
+        mode="lines",
+        name=driver_2,
+    ))
 
     fig.update_layout(
         title=title,
@@ -55,6 +52,12 @@ def plot_telemetry(tel1, tel2, driver_1, driver_2, column, title, y_title):
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+
+def format_timedelta(td):
+    if pd.isna(td):
+        return "N/A"
+    return f"{td.total_seconds():.3f}s"
 
 
 if st.sidebar.button("Analyze"):
@@ -82,38 +85,20 @@ if st.sidebar.button("Analyze"):
     col2.metric(f"{driver_2} Fastest Lap", str(lap_time_2))
     col3.metric("Lap Delta", str(lap_delta))
 
-    plot_telemetry(
-        tel1, tel2, driver_1, driver_2,
-        "Speed", "Speed vs Distance", "Speed (km/h)"
-    )
-
-    plot_telemetry(
-        tel1, tel2, driver_1, driver_2,
-        "Throttle", "Throttle vs Distance", "Throttle (%)"
-    )
-
-    plot_telemetry(
-        tel1, tel2, driver_1, driver_2,
-        "Brake", "Brake vs Distance", "Brake"
-    )
-
-    plot_telemetry(
-        tel1, tel2, driver_1, driver_2,
-        "RPM", "RPM vs Distance", "RPM"
-    )
+    plot_telemetry(tel1, tel2, driver_1, driver_2, "Speed", "Speed vs Distance", "Speed (km/h)")
+    plot_telemetry(tel1, tel2, driver_1, driver_2, "Throttle", "Throttle vs Distance", "Throttle (%)")
+    plot_telemetry(tel1, tel2, driver_1, driver_2, "Brake", "Brake vs Distance", "Brake")
+    plot_telemetry(tel1, tel2, driver_1, driver_2, "RPM", "RPM vs Distance", "RPM")
 
     st.subheader("Delta Time Analysis")
 
     fig_delta = go.Figure()
-
-    fig_delta.add_trace(
-        go.Scatter(
-            x=ref_tel["Distance"],
-            y=delta_time,
-            mode="lines",
-            name=f"{driver_1} vs {driver_2}",
-        )
-    )
+    fig_delta.add_trace(go.Scatter(
+        x=ref_tel["Distance"],
+        y=delta_time,
+        mode="lines",
+        name=f"{driver_1} vs {driver_2}",
+    ))
 
     fig_delta.update_layout(
         title=f"Delta Time: {driver_1} vs {driver_2}",
@@ -131,6 +116,43 @@ if st.sidebar.button("Analyze"):
     else:
         st.success(f"{driver_2} gained time over {driver_1} across the lap.")
 
+    st.subheader("Sector Performance Analysis")
+
+    sector_data = pd.DataFrame({
+        "Sector": ["Sector 1", "Sector 2", "Sector 3"],
+        driver_1: [
+            format_timedelta(lap1["Sector1Time"]),
+            format_timedelta(lap1["Sector2Time"]),
+            format_timedelta(lap1["Sector3Time"]),
+        ],
+        driver_2: [
+            format_timedelta(lap2["Sector1Time"]),
+            format_timedelta(lap2["Sector2Time"]),
+            format_timedelta(lap2["Sector3Time"]),
+        ],
+        "Faster Driver": [
+            driver_1 if lap1["Sector1Time"] < lap2["Sector1Time"] else driver_2,
+            driver_1 if lap1["Sector2Time"] < lap2["Sector2Time"] else driver_2,
+            driver_1 if lap1["Sector3Time"] < lap2["Sector3Time"] else driver_2,
+        ],
+    })
+
+    st.dataframe(sector_data, use_container_width=True)
+
+    sector_deltas = {
+        "Sector 1": (lap1["Sector1Time"] - lap2["Sector1Time"]).total_seconds(),
+        "Sector 2": (lap1["Sector2Time"] - lap2["Sector2Time"]).total_seconds(),
+        "Sector 3": (lap1["Sector3Time"] - lap2["Sector3Time"]).total_seconds(),
+    }
+
+    biggest_sector = max(sector_deltas, key=lambda s: abs(sector_deltas[s]))
+    biggest_delta = sector_deltas[biggest_sector]
+
+    if biggest_delta < 0:
+        st.info(f"{driver_1} gained the most time in {biggest_sector}.")
+    else:
+        st.info(f"{driver_2} gained the most time in {biggest_sector}.")
+
     st.subheader("Speed Colored Track Map")
 
     pos = lap1.get_pos_data()
@@ -143,21 +165,18 @@ if st.sidebar.button("Analyze"):
     speed = car_data["Speed"].iloc[:min_len]
 
     fig_track = go.Figure()
-
-    fig_track.add_trace(
-        go.Scatter(
-            x=x,
-            y=y,
-            mode="markers",
-            marker=dict(
-                size=6,
-                color=speed,
-                colorscale="Turbo",
-                colorbar=dict(title="Speed km/h"),
-            ),
-            showlegend=False,
-        )
-    )
+    fig_track.add_trace(go.Scatter(
+        x=x,
+        y=y,
+        mode="markers",
+        marker=dict(
+            size=6,
+            color=speed,
+            colorscale="Turbo",
+            colorbar=dict(title="Speed km/h"),
+        ),
+        showlegend=False,
+    ))
 
     fig_track.update_layout(
         title=f"{grand_prix} Speed Map - {driver_1}",
