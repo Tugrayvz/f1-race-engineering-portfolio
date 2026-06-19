@@ -10,7 +10,7 @@ st.set_page_config(page_title="F1 Telemetry Dashboard", layout="wide")
 
 st.title("F1 Telemetry Analysis Dashboard")
 st.write(
-    "Compare Formula 1 driver telemetry: speed, throttle, brake, RPM, delta time and track map."
+    "Compare Formula 1 driver telemetry: speed, throttle, brake, RPM, delta time and speed-colored track map."
 )
 
 CACHE_DIR = "telemetry-dashboard/data/cache"
@@ -131,26 +131,39 @@ if st.sidebar.button("Analyze"):
     else:
         st.success(f"{driver_2} gained time over {driver_1} across the lap.")
 
-    st.subheader("Track Map Visualization")
+    st.subheader("Speed Colored Track Map")
 
     pos = lap1.get_pos_data()
+    car_data = lap1.get_car_data()
+
+    min_len = min(len(pos), len(car_data))
+
+    x = pos["X"].iloc[:min_len]
+    y = pos["Y"].iloc[:min_len]
+    speed = car_data["Speed"].iloc[:min_len]
 
     fig_track = go.Figure()
 
     fig_track.add_trace(
         go.Scatter(
-            x=pos["X"],
-            y=pos["Y"],
-            mode="lines",
-            name=f"{driver_1} racing line",
+            x=x,
+            y=y,
+            mode="markers",
+            marker=dict(
+                size=6,
+                color=speed,
+                colorscale="Turbo",
+                colorbar=dict(title="Speed km/h"),
+            ),
+            showlegend=False,
         )
     )
 
     fig_track.update_layout(
-        title=f"{grand_prix} Track Map - {driver_1}",
+        title=f"{grand_prix} Speed Map - {driver_1}",
         xaxis_title="X Position",
         yaxis_title="Y Position",
-        height=600,
+        height=700,
         yaxis=dict(scaleanchor="x", scaleratio=1),
     )
 

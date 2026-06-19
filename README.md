@@ -25,6 +25,7 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 - RPM Analysis
 - Delta Time Analysis
 - Track Map Visualization
+- Speed Colored Track Map
 - Average Speed Comparison
 - Top Speed Comparison
 - Race Engineer Notes
@@ -80,6 +81,12 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ---
 
+### Speed Colored Track Map
+
+![Speed Colored Track Map](images/speed-track-map.png)
+
+---
+
 ### Race Engineer Notes
 
 ![Race Engineer Notes](images/race-engineer-notes.png)
@@ -124,17 +131,18 @@ The dashboard compares telemetry traces and highlights performance differences i
 - [x] RPM analysis
 - [x] Lap delta visualization
 - [x] Track map visualization
+- [x] Speed-colored track map
 - [x] Average speed comparison
 - [x] Top speed comparison
 - [x] Race engineer notes
 
 ### Phase 2 — Advanced Telemetry
 
-- [ ] Speed-colored track map
 - [ ] Corner-by-corner analysis
 - [ ] Sector performance analysis
 - [ ] Interactive telemetry overlays
 - [ ] Racing line comparison
+- [ ] AI race engineer summary
 
 ### Phase 3 — Race Strategy Simulator
 
@@ -168,6 +176,7 @@ f1-race-engineering-portfolio/
 │   ├── brake-comparison.png
 │   ├── delta-time-analysis.png
 │   ├── track-map.png
+│   ├── speed-track-map.png
 │   └── race-engineer-notes.png
 │
 └── telemetry-dashboard/
