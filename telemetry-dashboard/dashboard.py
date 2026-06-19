@@ -11,7 +11,7 @@ st.set_page_config(page_title="F1 Telemetry Dashboard", layout="wide")
 
 st.title("F1 Telemetry Analysis Dashboard")
 st.write(
-    "Compare Formula 1 driver telemetry, sector performance, speed maps and AI-style engineering summaries."
+    "Compare Formula 1 driver telemetry, sector performance, racing lines, speed maps and AI-style engineering summaries."
 )
 
 CACHE_DIR = "telemetry-dashboard/data/cache"
@@ -30,8 +30,23 @@ driver_2 = st.sidebar.text_input("Driver 2 Code", "LEC")
 def plot_telemetry(tel1, tel2, driver_1, driver_2, column, title, y_title):
     fig = go.Figure()
 
-    fig.add_trace(go.Scatter(x=tel1["Distance"], y=tel1[column], mode="lines", name=driver_1))
-    fig.add_trace(go.Scatter(x=tel2["Distance"], y=tel2[column], mode="lines", name=driver_2))
+    fig.add_trace(
+        go.Scatter(
+            x=tel1["Distance"],
+            y=tel1[column],
+            mode="lines",
+            name=driver_1,
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=tel2["Distance"],
+            y=tel2[column],
+            mode="lines",
+            name=driver_2,
+        )
+    )
 
     fig.update_layout(
         title=title,
@@ -62,21 +77,29 @@ def generate_ai_race_engineer_summary(
     slower_driver = driver_2 if fastest_driver == driver_1 else driver_1
     lap_delta_seconds = abs(lap_delta.total_seconds())
 
-    sector_1_winner = sector_winners[0]
-    sector_2_winner = sector_winners[1]
-    sector_3_winner = sector_winners[2]
-
     if avg_speed_diff > 0:
-        avg_speed_text = f"{driver_1} carried a higher average speed by {abs(avg_speed_diff):.2f} km/h."
+        avg_speed_text = (
+            f"{driver_1} carried a higher average speed by "
+            f"{abs(avg_speed_diff):.2f} km/h."
+        )
     elif avg_speed_diff < 0:
-        avg_speed_text = f"{driver_2} carried a higher average speed by {abs(avg_speed_diff):.2f} km/h."
+        avg_speed_text = (
+            f"{driver_2} carried a higher average speed by "
+            f"{abs(avg_speed_diff):.2f} km/h."
+        )
     else:
         avg_speed_text = "Both drivers had identical average speed across the lap."
 
     if top_speed_diff > 0:
-        top_speed_text = f"{driver_1} achieved a higher top speed by {abs(top_speed_diff):.2f} km/h."
+        top_speed_text = (
+            f"{driver_1} achieved a higher top speed by "
+            f"{abs(top_speed_diff):.2f} km/h."
+        )
     elif top_speed_diff < 0:
-        top_speed_text = f"{driver_2} achieved a higher top speed by {abs(top_speed_diff):.2f} km/h."
+        top_speed_text = (
+            f"{driver_2} achieved a higher top speed by "
+            f"{abs(top_speed_diff):.2f} km/h."
+        )
     else:
         top_speed_text = "Both drivers reached the same top speed."
 
@@ -85,9 +108,9 @@ def generate_ai_race_engineer_summary(
 
 Sector performance shows:
 
-- Sector 1 advantage: **{sector_1_winner}**
-- Sector 2 advantage: **{sector_2_winner}**
-- Sector 3 advantage: **{sector_3_winner}**
+- Sector 1 advantage: **{sector_winners[0]}**
+- Sector 2 advantage: **{sector_winners[1]}**
+- Sector 3 advantage: **{sector_winners[2]}**
 
 The largest performance difference occurred in **{biggest_sector}**, making it the decisive sector in this comparison.
 
@@ -125,10 +148,22 @@ if st.sidebar.button("Analyze"):
     col2.metric(f"{driver_2} Fastest Lap", str(lap_time_2))
     col3.metric("Lap Delta", str(lap_delta))
 
-    plot_telemetry(tel1, tel2, driver_1, driver_2, "Speed", "Speed vs Distance", "Speed (km/h)")
-    plot_telemetry(tel1, tel2, driver_1, driver_2, "Throttle", "Throttle vs Distance", "Throttle (%)")
-    plot_telemetry(tel1, tel2, driver_1, driver_2, "Brake", "Brake vs Distance", "Brake")
-    plot_telemetry(tel1, tel2, driver_1, driver_2, "RPM", "RPM vs Distance", "RPM")
+    plot_telemetry(
+        tel1, tel2, driver_1, driver_2,
+        "Speed", "Speed vs Distance", "Speed (km/h)"
+    )
+    plot_telemetry(
+        tel1, tel2, driver_1, driver_2,
+        "Throttle", "Throttle vs Distance", "Throttle (%)"
+    )
+    plot_telemetry(
+        tel1, tel2, driver_1, driver_2,
+        "Brake", "Brake vs Distance", "Brake"
+    )
+    plot_telemetry(
+        tel1, tel2, driver_1, driver_2,
+        "RPM", "RPM vs Distance", "RPM"
+    )
 
     st.subheader("Delta Time Analysis")
 
@@ -156,9 +191,10 @@ if st.sidebar.button("Analyze"):
     sector_times_1 = [lap1["Sector1Time"], lap1["Sector2Time"], lap1["Sector3Time"]]
     sector_times_2 = [lap2["Sector1Time"], lap2["Sector2Time"], lap2["Sector3Time"]]
 
-    sector_winners = []
-    for s1, s2 in zip(sector_times_1, sector_times_2):
-        sector_winners.append(driver_1 if s1 < s2 else driver_2)
+    sector_winners = [
+        driver_1 if s1 < s2 else driver_2
+        for s1, s2 in zip(sector_times_1, sector_times_2)
+    ]
 
     sector_data = pd.DataFrame(
         {
@@ -184,6 +220,45 @@ if st.sidebar.button("Analyze"):
         st.info(f"{driver_1} gained the most time in {biggest_sector}.")
     else:
         st.info(f"{driver_2} gained the most time in {biggest_sector}.")
+
+    st.subheader("Racing Line Comparison")
+
+    pos1 = lap1.get_pos_data()
+    pos2 = lap2.get_pos_data()
+
+    fig_line = go.Figure()
+
+    fig_line.add_trace(
+        go.Scatter(
+            x=pos1["X"],
+            y=pos1["Y"],
+            mode="lines",
+            name=f"{driver_1} racing line",
+            line=dict(width=5),
+            opacity=0.75,
+        )
+    )
+
+    fig_line.add_trace(
+        go.Scatter(
+            x=pos2["X"],
+            y=pos2["Y"],
+            mode="lines",
+            name=f"{driver_2} racing line",
+            line=dict(width=3, dash="dash"),
+            opacity=0.9,
+        )
+    )
+
+    fig_line.update_layout(
+        title=f"{grand_prix} Racing Line Comparison: {driver_1} vs {driver_2}",
+        xaxis_title="X Position",
+        yaxis_title="Y Position",
+        height=700,
+        yaxis=dict(scaleanchor="x", scaleratio=1),
+    )
+
+    st.plotly_chart(fig_line, use_container_width=True)
 
     st.subheader("Speed Colored Track Map")
 
@@ -234,7 +309,6 @@ if st.sidebar.button("Analyze"):
 
     st.write(f"{driver_1} average speed: {avg_speed_1:.2f} km/h")
     st.write(f"{driver_2} average speed: {avg_speed_2:.2f} km/h")
-
     st.write(f"{driver_1} top speed: {max_speed_1:.2f} km/h")
     st.write(f"{driver_2} top speed: {max_speed_2:.2f} km/h")
 
@@ -244,10 +318,11 @@ if st.sidebar.button("Analyze"):
         [f"Sector {i + 1}: {winner}" for i, winner in enumerate(sector_winners)]
     )
 
-    if abs(avg_speed_diff) > abs(top_speed_diff):
-        key_area = "Average lap speed"
-    else:
-        key_area = "Top speed performance"
+    key_area = (
+        "Average lap speed"
+        if abs(avg_speed_diff) > abs(top_speed_diff)
+        else "Top speed performance"
+    )
 
     report_data = pd.DataFrame(
         {
