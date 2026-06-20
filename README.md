@@ -36,6 +36,7 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 - Race Strategy Simulator
 - Tyre Degradation Model
 - Strategy Comparison Visualization
+- Streamlit Race Strategy Simulator
 
 ---
 
@@ -125,6 +126,12 @@ Interactive dashboard for comparing Formula 1 drivers using telemetry data.
 
 ---
 
+### Strategy Simulator Dashboard
+
+![Strategy Simulator Dashboard](images/strategy-dashboard.png)
+
+---
+
 ### Race Engineer Notes
 
 ![Race Engineer Notes](images/race-engineer-notes.png)
@@ -172,6 +179,10 @@ A race strategy simulation module for comparing tyre compounds, pit stop timing 
 - Total race time estimation
 - Automatic recommended strategy selection
 - Tyre degradation visualization
+- Interactive Streamlit dashboard
+- Adjustable pit stop timing
+- Adjustable tyre compounds
+- Live strategy comparison
 
 ---
 
@@ -208,6 +219,9 @@ A race strategy simulation module for comparing tyre compounds, pit stop timing 
 - [x] Tire degradation modelling
 - [x] Strategy comparison visualization
 - [x] Multi-strategy comparison
+- [x] Streamlit dashboard
+- [x] Adjustable tyre compounds
+- [x] Adjustable pit stop timing
 - [ ] Pit stop optimization
 - [ ] Safety car simulations
 - [ ] Undercut / Overcut analysis
@@ -243,6 +257,7 @@ f1-race-engineering-portfolio/
 │   ├── engineering-report.png
 │   ├── ai-race-engineer-summary.png
 │   ├── strategy-comparison.png
+│   ├── strategy-dashboard.png
 │   └── race-engineer-notes.png
 │
 ├── telemetry-dashboard/
@@ -254,6 +269,7 @@ f1-race-engineering-portfolio/
 │
 └── strategy-simulator/
     ├── simulator.py
+    ├── dashboard.py
     └── README.md
 ```
 
