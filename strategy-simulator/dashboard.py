@@ -14,7 +14,8 @@ st.set_page_config(page_title="F1 Strategy Simulator", layout="wide")
 
 st.title("F1 Race Strategy Simulator")
 st.write(
-    "Compare Formula 1 race strategies using tyre degradation, pit stop timing and total race time simulation."
+    "Compare Formula 1 race strategies using tyre degradation, pit stop timing, "
+    "pit stop optimization and total race time simulation."
 )
 
 
@@ -37,7 +38,6 @@ def simulate_strategy(
             tyre_age = lap - pit_lap + 1
 
         degradation = TYRE_MODELS[tyre]
-
         lap_time = base_lap_time + tyre_age * degradation
 
         if lap == pit_lap:
@@ -57,6 +57,40 @@ def simulate_strategy(
 
 def total_race_time(strategy_df):
     return strategy_df["Lap Time"].sum()
+
+
+def optimize_pit_lap(
+    total_laps,
+    base_lap_time,
+    pit_loss,
+    stint_1_tyre,
+    stint_2_tyre,
+):
+    results = []
+
+    for pit_lap in range(2, total_laps):
+        strategy = simulate_strategy(
+            total_laps=total_laps,
+            base_lap_time=base_lap_time,
+            pit_lap=pit_lap,
+            pit_loss=pit_loss,
+            stint_1_tyre=stint_1_tyre,
+            stint_2_tyre=stint_2_tyre,
+        )
+
+        race_time = total_race_time(strategy)
+
+        results.append(
+            {
+                "Pit Lap": pit_lap,
+                "Total Race Time": race_time,
+            }
+        )
+
+    results_df = pd.DataFrame(results)
+    best_row = results_df.loc[results_df["Total Race Time"].idxmin()]
+
+    return int(best_row["Pit Lap"]), float(best_row["Total Race Time"]), results_df
 
 
 st.sidebar.header("Race Settings")
@@ -144,6 +178,58 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+st.subheader("Pit Stop Optimizer")
+
+optimizer_strategy = st.selectbox(
+    "Select strategy tyre combination to optimize",
+    [
+        "Medium -> Hard",
+        "Soft -> Hard",
+        "Soft -> Medium",
+        "Hard -> Medium",
+    ],
+)
+
+tyre_1, tyre_2 = optimizer_strategy.split(" -> ")
+
+if st.button("Optimize Pit Stop"):
+    best_pit_lap, best_race_time, optimization_df = optimize_pit_lap(
+        total_laps=total_laps,
+        base_lap_time=base_lap_time,
+        pit_loss=pit_loss,
+        stint_1_tyre=tyre_1,
+        stint_2_tyre=tyre_2,
+    )
+
+    col_opt1, col_opt2 = st.columns(2)
+
+    col_opt1.metric("Best Pit Lap", best_pit_lap)
+    col_opt2.metric("Estimated Race Time", f"{best_race_time:.2f}s")
+
+    fig_opt = go.Figure()
+
+    fig_opt.add_trace(
+        go.Scatter(
+            x=optimization_df["Pit Lap"],
+            y=optimization_df["Total Race Time"],
+            mode="lines+markers",
+            name="Race time by pit lap",
+        )
+    )
+
+    fig_opt.update_layout(
+        title=f"Pit Stop Optimization: {optimizer_strategy}",
+        xaxis_title="Pit Lap",
+        yaxis_title="Total Race Time (seconds)",
+        height=500,
+    )
+
+    st.plotly_chart(fig_opt, use_container_width=True)
+
+    st.success(
+        f"Optimal pit window found: lap {best_pit_lap} with an estimated race time of {best_race_time:.2f}s."
+    )
 
 st.subheader("Strategy Details")
 
